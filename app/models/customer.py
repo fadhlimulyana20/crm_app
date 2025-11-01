@@ -7,7 +7,7 @@ class Customer(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
+    email = Column(String, index=True)
     phone = Column(String, nullable=True)
     address = Column(String, nullable=True)
     company = Column(String, nullable=True)

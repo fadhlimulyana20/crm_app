@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from app.database import Base, SessionLocal
 from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 class User(Base):
     __tablename__ = "users"

@@ -1,13 +1,22 @@
+from dotenv import find_dotenv, load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+else:
+    loaded = load_dotenv(find_dotenv())
+    if not loaded:
+        # fallback: warn once — replace with logger if needed
+        print("Warning: .env file not found; environment variables may be missing")
+
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.controllers.hello import router as hello_router
 from app.controllers.customer import router as customer_router
 from app.controllers.auth import router as auth_router
-from app.database import engine, Base
-from app.models.user import User
-
-# Create tables
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
