@@ -1,0 +1,33 @@
+{
+  "name": "crm_app",
+  "version": "1.0.0",
+  "description": "This is a starter project using FastAPI with Jinja2 templates, structured in MVC architecture.",
+  "main": "webpack.config.js",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "dev": "webpack --mode=development --watch"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.22.0",
+    "@tailwindcss/postcss": "^4.1.16",
+    "autoprefixer": "^10.4.21",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "css-minimizer-webpack-plugin": "^7.0.2",
+    "mini-css-extract-plugin": "^2.9.4",
+    "postcss": "^8.5.6",
+    "postcss-calc": "^10.1.1",
+    "postcss-loader": "^8.2.0",
+    "style-loader": "^3.3.0",
+    "tailwindcss": "^4.1.16",
+    "terser-webpack-plugin": "^5.3.14",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "alpinejs": "^3.15.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
