@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, or_
 from sqlalchemy.sql import func
 from app.database import Base, SessionLocal
 
@@ -33,10 +33,21 @@ def get_customer(customer_id: int):
     finally:
         db.close()
 
-def get_customers(skip: int = 0, limit: int = 100):
+def get_customers(search: str = None, skip: int = 0, limit: int = 100):
     db = SessionLocal()
     try:
-        return db.query(Customer).offset(skip).limit(limit).all()
+        query = db.query(Customer)
+        if search:
+            query = query.filter(
+                or_(
+                    Customer.name.ilike(f"%{search}%"),
+                    Customer.email.ilike(f"%{search}%"),
+                    Customer.phone.ilike(f"%{search}%")
+                )
+            )
+        total_count = query.count()
+        customers = query.offset(skip).limit(limit).all()
+        return customers, total_count
     finally:
         db.close()
 

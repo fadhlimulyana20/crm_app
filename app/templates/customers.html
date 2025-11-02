@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}CRM Dashboard - Customer Management{% endblock %}
+
+{% block content %}
+<div x-data="customersApp()" class="px-4 py-6 sm:px-0">
+    <!-- Page Header -->
+    <div class="md:flex md:items-center md:justify-between">
+        <div class="min-w-0 flex-1">
+            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                Customer Management
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Manage your customer database with search and pagination
+            </p>
+        </div>
+        <div class="mt-4 flex md:mt-0 md:ml-4">
+            <button @click="fetchCustomers()" :disabled="loading"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="mt-8 bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input type="text" x-model="search" @input="onSearchChange"
+                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-12 sm:text-sm border-gray-300 rounded-md"
+                               placeholder="Search by name, email, or phone">
+                    </div>
+                </div>
+                <div>
+                    <label for="limit" class="block text-sm font-medium text-gray-700">Items per page</label>
+                    <select x-model="limit" @change="onLimitChange"
+                            class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="10">10 per page</option>
+                        <option value="25">25 per page</option>
+                        <option value="50">50 per page</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="loading" class="mt-8 flex justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>
+
+    <!-- Error State -->
+    <div x-show="error && !loading" class="mt-8 bg-red-50 border border-red-200 rounded-md p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Error loading customers</h3>
+                <div class="mt-2 text-sm text-red-700">
+                    <p x-text="error"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Table -->
+    <div x-show="!loading && !error" class="mt-8 bg-white shadow overflow-hidden sm:rounded-md">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                Customers (<span x-text="customers.length"></span>)
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                A list of all customers in your database.
+            </p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Phone
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Address
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Company
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Created At
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Updated At
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <template x-for="customer in customers" :key="customer.id">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <span x-text="customer.id"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span x-text="customer.name"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span x-text="customer.email"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span x-text="customer.phone || 'N/A'"></span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                                <span x-text="customer.address || 'N/A'"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span x-text="customer.company || 'N/A'"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span x-text="new Date(customer.created_at).toLocaleDateString()"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span x-text="new Date(customer.updated_at).toLocaleDateString()"></span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <button @click="prevPage()" :disabled="currentPage <= 1 || loading"
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                    Previous
+                </button>
+                <button @click="nextPage()" :disabled="currentPage >= totalPages || loading"
+                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                    Next
+                </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Showing page <span class="font-medium" x-text="currentPage"></span> of <span class="font-medium" x-text="totalPages"></span>
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button @click="prevPage()" :disabled="currentPage <= 1 || loading"
+                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button @click="nextPage()" :disabled="currentPage >= totalPages || loading"
+                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function customersApp() {
+        return {
+            customers: [],
+            loading: false,
+            error: null,
+            search: '',
+            skip: 0,
+            limit: 10,
+            totalCount: 0,
+            currentPage: 1,
+            totalPages: 1,
+            init() {
+                this.readUrlParams();
+                this.fetchCustomers();
+            },
+            readUrlParams() {
+                const urlParams = new URLSearchParams(window.location.search);
+                this.search = urlParams.get('search') || '';
+                this.skip = parseInt(urlParams.get('skip')) || 0;
+                this.limit = parseInt(urlParams.get('limit')) || 10;
+                this.currentPage = Math.floor(this.skip / this.limit) + 1;
+            },
+            updateUrl() {
+                const url = new URL(window.location);
+                if (this.search) {
+                    url.searchParams.set('search', this.search);
+                } else {
+                    url.searchParams.delete('search');
+                }
+                url.searchParams.set('skip', this.skip);
+                url.searchParams.set('limit', this.limit);
+                window.history.replaceState({}, '', url);
+            },
+            async fetchCustomers() {
+                this.loading = true;
+                this.error = null;
+                try {
+                    const params = new URLSearchParams();
+                    if (this.search) {
+                        params.set('search', this.search);
+                    }
+                    params.set('skip', this.skip);
+                    params.set('limit', this.limit);
+
+                    const response = await fetch(`/api/customers/?${params}`);
+                    if (!response.ok) throw new Error('Failed to fetch customers');
+                    const result = await response.json();
+
+                    // Ensure we always have an array
+                    this.customers = Array.isArray(result.data) ? result.data : [];
+                    this.totalPages = result.meta ? result.meta.total_page : 1;
+                } catch (err) {
+                    this.error = err.message;
+                    this.customers = []; // Reset to empty array on error
+                } finally {
+                    this.loading = false;
+                }
+            },
+            onSearchChange() {
+                this.skip = 0;
+                this.currentPage = 1;
+                this.updateUrl();
+                this.fetchCustomers();
+            },
+            onLimitChange() {
+                this.skip = 0;
+                this.currentPage = 1;
+                this.updateUrl();
+                this.fetchCustomers();
+            },
+            prevPage() {
+                if (this.currentPage > 1) {
+                    this.skip -= this.limit;
+                    this.currentPage--;
+                    this.updateUrl();
+                    this.fetchCustomers();
+                }
+            },
+            nextPage() {
+                this.skip += this.limit;
+                this.currentPage++;
+                this.updateUrl();
+                this.fetchCustomers();
+            }
+        }
+    }
+</script>
+{% endblock %}

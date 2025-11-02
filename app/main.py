@@ -15,13 +15,17 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.controllers.hello import router as hello_router
-from app.controllers.customer import router as customer_router
+from app.controllers.customer import router as customer_router, html_router as customer_html_router
 from app.controllers.auth import router as auth_router
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="app/static/dist"), name="static")
 
+# HTML routes
 app.include_router(hello_router)
-app.include_router(customer_router)
 app.include_router(auth_router, prefix="/auth")
+app.include_router(customer_html_router)
+
+# API routes
+app.include_router(customer_router, prefix="/api")
