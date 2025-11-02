@@ -3,7 +3,21 @@
 {% block title %}CRM Dashboard - Customer Management{% endblock %}
 
 {% block content %}
-<div x-data="customersApp()" class="px-4 py-6 sm:px-0">
+<div x-data="customersApp()" class="max-w-8xl mx-auto px-4 py-6 lg:px-8">
+    <!-- Breadcrumb -->
+    {% set breadcrumb_items = [
+        {
+            'text': 'Dashboard',
+            'url': '/',
+            'icon': 'M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z'
+        },
+        {
+            'text': 'Customers',
+            'url': '#'
+        }
+    ] %}
+    {% include 'components/breadcrumb.html' %}
+
     <!-- Page Header -->
     <div class="md:flex md:items-center md:justify-between">
         <div class="min-w-0 flex-1">
@@ -115,6 +129,9 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Updated At
                         </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -143,6 +160,9 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <span x-text="new Date(customer.updated_at).toLocaleDateString()"></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <a :href="'/customers/' + customer.id" class="text-blue-600 hover:text-blue-900">View Details</a>
                             </td>
                         </tr>
                     </template>

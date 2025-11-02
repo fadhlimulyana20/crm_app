@@ -59,3 +59,11 @@ templates = Jinja2Templates(directory="app/templates")
 @html_router.get("/", response_class=HTMLResponse)
 async def customers_page(request: Request):
     return templates.TemplateResponse("customers.html", {"request": request})
+
+# HTML Controller for individual customer detail page
+@html_router.get("/{customer_id}", response_class=HTMLResponse)
+async def customer_detail_page(request: Request, customer_id: int):
+    db_customer = get_customer(customer_id)
+    if db_customer is None:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return templates.TemplateResponse("customer_detail.html", {"request": request, "customer": db_customer})
